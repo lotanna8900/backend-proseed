@@ -5,6 +5,7 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 const fetchTelegramID = require('./api/fetchTelegramID');
 const userRoutes = require('./routes/userRoutes');
+const bot = require('./telegram/bot');
 
 dotenv.config();
 
@@ -20,10 +21,16 @@ connectDB();
 
 app.use(express.json());
 
-app.get('/api/fetchTelegramID', fetchTelegramID); // GET endpoint
-app.use('/api/users', userRoutes); // POST endpoint
+app.get('/api/fetchTelegramID', fetchTelegramID);
+app.use('/api/users', userRoutes);
+app.use('/api', bot);
 
 app.get('/health', (req, res) => res.send('Server is healthy'));
+
+// Handle the root URL and display a custom message
+app.get('/', (req, res) => {
+  res.send('Backend service is running');
+});
 
 const buildPath = path.join(__dirname, 'build');
 app.use(express.static(buildPath));
