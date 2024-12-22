@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const fetchTelegramID = require('./api/fetchTelegramID');
+const userRoutes = require('./routes/userRoutes');
 
 dotenv.config();
 
@@ -19,8 +20,9 @@ connectDB();
 
 app.use(express.json());
 
-// Simplify the route setup
-app.get('/api/fetchTelegramID', fetchTelegramID);
+app.use('/api/fetchTelegramID', fetchTelegramID);
+app.use('/api/users', userRoutes);
+
 app.get('/health', (req, res) => res.send('Server is healthy'));
 
 const buildPath = path.join(__dirname, 'build');
@@ -38,3 +40,4 @@ const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
