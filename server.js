@@ -18,7 +18,9 @@ app.use(cors({
 connectDB();
 
 app.use(express.json());
+
 app.get('/api/fetchTelegramID', fetchTelegramID);
+app.get('/health', (req, res) => res.send('Server is healthy'));
 
 const buildPath = path.join(__dirname, 'build');
 app.use(express.static(buildPath));
@@ -35,4 +37,5 @@ const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
 
