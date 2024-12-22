@@ -5,7 +5,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
-const fetchTelegramID = require('./api/fetchTelegramID');
+const fetchTelegramID = require('./api/fetchTelegramID'); // Correctly imported
 const bot = require('./telegram/bot');
 
 dotenv.config();
@@ -22,7 +22,7 @@ connectDB();
 
 app.use(express.json());
 app.use('/api/users', userRoutes);
-app.use('/api/fetchTelegramID', fetchTelegramID);
+app.get('/api/fetchTelegramID', fetchTelegramID); // Ensure it's app.get, not app.use
 
 const buildPath = path.join(__dirname, 'build');
 console.log(`Static files served from: ${buildPath}`);
