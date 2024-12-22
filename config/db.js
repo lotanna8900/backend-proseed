@@ -5,9 +5,7 @@ const connectDB = async () => {
   console.log(`Attempting to connect to MongoDB with URI: ${uri}`);
   try {
     const conn = await mongoose.connect(uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 5000
+      serverSelectionTimeoutMS: 5000 // You can set other options as needed
     });
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (err) {
@@ -17,3 +15,4 @@ const connectDB = async () => {
 };
 
 module.exports = connectDB;
+
