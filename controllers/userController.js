@@ -44,7 +44,8 @@ const createUser = async (req, res) => {
 const fetchTelegramID = async (req, res) => {
     const { telegramID } = req.body;
     try {
-      const user = await User.findOneAndUpdate({ telegramId: telegramID }, { telegramId: telegramID }, { new: true });
+      // Find the user by telegramId and update it
+      const user = await User.findOneAndUpdate({ telegramId: telegramID }, { $set: { telegramId: telegramID } }, { new: true });
   
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
@@ -53,7 +54,7 @@ const fetchTelegramID = async (req, res) => {
     } catch (err) {
       res.status(500).json({ message: err.message });
     }
-  };
+  };  
   
 
 module.exports = {
