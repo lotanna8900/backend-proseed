@@ -30,15 +30,22 @@ const updateUserBalance = async (req, res) => {
 
 // Create or register a new user
 const createUser = async (req, res) => {
-  const { username, walletAddress } = req.body;
-  try {
-    const newUser = new User({ username, walletAddress, psdtBalance: 0 });
-    await newUser.save();
-    res.status(201).json(newUser);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
+    const { username, walletAddress, telegramId } = req.body;
+    try {
+      // Check if a user with the same username already exists
+      const existingUser = await User.findOne({ username });
+      if (existingUser) {
+        return res.status(400).json({ message: 'Username already exists' });
+      }
+      
+      const newUser = new User({ username, walletAddress, telegramId, psdtBalance: 0 });
+      await newUser.save();
+      res.status(201).json(newUser);
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  };
+  
 
 // Function to retrieve user's Telegram ID and update in user profile
 const fetchTelegramID = async (req, res) => {
