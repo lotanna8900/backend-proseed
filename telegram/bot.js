@@ -23,7 +23,10 @@ app.use(express.json());
 app.use(limiter);
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
-const bot = new TelegramBot(token, { polling: true });
+const bot = new TelegramBot(token, { webHook: true });
+
+const webhookURL = `https://backend-proseed.vercel.app/bot${token}`;
+bot.setWebHook(webhookURL);
 
 client.connect()
   .then(() => {
@@ -40,13 +43,6 @@ const handleError = (error, chatId, message = 'An error occurred') => {
   bot.sendMessage(chatId, message);
 };
 
-bot.on('polling_error', (error) => {
-  console.error('Polling error:', error);
-  setTimeout(() => {
-    bot.startPolling();
-  }, 5000);
-});
-
 const fetchData = async (url, options, retries = 3) => {
   try {
     const response = await axios.get(url, options);
@@ -60,38 +56,42 @@ const fetchData = async (url, options, retries = 3) => {
   }
 };
 
+app.post(`/bot${token}`, (req, res) => {
+  bot.processUpdate(req.body);
+  res.sendStatus(200);
+});
+
 bot.onText(/\/start/, async (msg) => {
-    const chatId = msg.chat.id;
-    let username = msg.from.username || `${msg.from.first_name} ${msg.from.last_name}`.trim() || msg.from.first_name;
-    
-    // Fallback to a default username if none is provided
-    if (!username) {
-      username = `User_${chatId}`;
-    }
-  
-    try {
-      const user = await registerOrUpdateUser(chatId, username);
-  
-      const welcomeMessage = `Welcome to proSEED, ${user.username}!\nYour ID: ${user.telegramId}`;
-      const options = {
-        reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: 'Start App',
-                web_app: { url: 'https://proseedtesting.netlify.app/app' },
-              },
-            ],
+  const chatId = msg.chat.id;
+  let username = msg.from.username || `${msg.from.first_name} ${msg.from.last_name}`.trim() || msg.from.first_name;
+
+  // Fallback to a default username if none is provided
+  if (!username) {
+    username = `User_${chatId}`;
+  }
+
+  try {
+    const user = await registerOrUpdateUser(chatId, username);
+
+    const welcomeMessage = `Welcome to proSEED, ${user.username}!\nYour ID: ${user.telegramId}`;
+    const options = {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: 'Start App',
+              web_app: { url: 'https://proseedtesting.netlify.app/app' },
+            },
           ],
-        },
-      };
-  
-      bot.sendMessage(chatId, welcomeMessage, options);
-    } catch (error) {
-      handleError(error, chatId, 'Error handling /start command');
-    }
-  });
-  
+        ],
+      },
+    };
+
+    bot.sendMessage(chatId, welcomeMessage, options);
+  } catch (error) {
+    handleError(error, chatId, 'Error handling /start command');
+  }
+});
 
 bot.onText(/\/balance/, async (msg) => {
   const chatId = msg.chat.id;
@@ -142,4 +142,5 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+
 
