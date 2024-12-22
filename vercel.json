@@ -1,21 +1,20 @@
 {
-    "version": 2,
-    "builds": [
-      {
-        "src": "proseed-backend/server.js",
-        "use": "@vercel/node"
-      }
-    ],
-    "routes": [
-      {
-        "src": "/api/(.*)",
-        "dest": "proseed-backend/server.js"
-      },
-      {
-        "src": "/(.*)",
-        "dest": "/build/index.html"
-      }
-    ],
-    "installCommand": "npm install --prefix proseed-backend"
-  }
-  
+  "version": 2,
+  "builds": [
+    {
+      "src": "proseed-backend/server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "proseed-backend/server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/build/index.html"
+    }
+  ],
+  "installCommand": "npm install --prefix proseed-backend"
+}
