@@ -1,6 +1,5 @@
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
@@ -22,26 +21,10 @@ app.use(express.json());
 app.get('/api/fetchTelegramID', fetchTelegramID);
 
 const buildPath = path.join(__dirname, 'build');
-console.log(`Static files served from: ${buildPath}`);
-
-if (fs.existsSync(buildPath)) {
-  console.log('Build directory exists.');
-} else {
-  console.error('Build directory does NOT exist.');
-}
-
-const indexPath = path.join(buildPath, 'index.html');
-if (fs.existsSync(indexPath)) {
-  console.log('index.html exists.');
-} else {
-  console.error('index.html does NOT exist.');
-}
-
 app.use(express.static(buildPath));
 
 app.get('*', (req, res) => {
-  console.log(`Requested URL: ${req.url}`);
-  res.sendFile(indexPath, (err) => {
+  res.sendFile(path.join(buildPath, 'index.html'), (err) => {
     if (err) {
       res.status(500).send(err);
     }
