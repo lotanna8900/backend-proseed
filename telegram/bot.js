@@ -61,31 +61,37 @@ const fetchData = async (url, options, retries = 3) => {
 };
 
 bot.onText(/\/start/, async (msg) => {
-  const chatId = msg.chat.id;
-  const username = msg.from.username || `${msg.from.first_name} ${msg.from.last_name}`.trim() || msg.from.first_name;
-
-  try {
-    const user = await registerOrUpdateUser(chatId, username);
-
-    const welcomeMessage = `Welcome to proSEED, ${user.username}!\nYour ID: ${user.telegramId}`;
-    const options = {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: 'Start App',
-              web_app: { url: 'https://proseedtesting.netlify.app/app' },
-            },
+    const chatId = msg.chat.id;
+    let username = msg.from.username || `${msg.from.first_name} ${msg.from.last_name}`.trim() || msg.from.first_name;
+    
+    // Fallback to a default username if none is provided
+    if (!username) {
+      username = `User_${chatId}`;
+    }
+  
+    try {
+      const user = await registerOrUpdateUser(chatId, username);
+  
+      const welcomeMessage = `Welcome to proSEED, ${user.username}!\nYour ID: ${user.telegramId}`;
+      const options = {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: 'Start App',
+                web_app: { url: 'https://proseedtesting.netlify.app/app' },
+              },
+            ],
           ],
-        ],
-      },
-    };
-
-    bot.sendMessage(chatId, welcomeMessage, options);
-  } catch (error) {
-    handleError(error, chatId, 'Error handling /start command');
-  }
-});
+        },
+      };
+  
+      bot.sendMessage(chatId, welcomeMessage, options);
+    } catch (error) {
+      handleError(error, chatId, 'Error handling /start command');
+    }
+  });
+  
 
 bot.onText(/\/balance/, async (msg) => {
   const chatId = msg.chat.id;
@@ -136,3 +142,4 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+
