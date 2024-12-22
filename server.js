@@ -20,8 +20,8 @@ connectDB();
 
 app.use(express.json());
 
-app.use('/api/fetchTelegramID', fetchTelegramID);
-app.use('/api/users', userRoutes);
+app.get('/api/fetchTelegramID', fetchTelegramID); // GET endpoint
+app.use('/api/users', userRoutes); // POST endpoint
 
 app.get('/health', (req, res) => res.send('Server is healthy'));
 
@@ -40,4 +40,5 @@ const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
 
