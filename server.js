@@ -19,6 +19,7 @@ connectDB();
 
 app.use(express.json());
 
+// Simplify the route setup
 app.get('/api/fetchTelegramID', fetchTelegramID);
 app.get('/health', (req, res) => res.send('Server is healthy'));
 
@@ -37,5 +38,3 @@ const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
-
