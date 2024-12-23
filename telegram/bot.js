@@ -3,10 +3,15 @@ const TelegramBot = require('node-telegram-bot-api');
 const { MongoClient } = require('mongodb');
 const rateLimit = require('express-rate-limit');
 const dotenv = require('dotenv');
+const path = require('path');
 const axios = require('axios');
 const { registerOrUpdateUser } = require('../controllers/userController');
 
-dotenv.config();
+// Load environment variables from the root directory
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
+console.log("MONGO_URI:", process.env.MONGO_URI); // Log Mongo URI
+console.log("TELEGRAM_BOT_TOKEN:", process.env.TELEGRAM_BOT_TOKEN); // Log Telegram Bot Token
 
 if (!process.env.MONGO_URI || !process.env.TELEGRAM_BOT_TOKEN) {
   console.error("Error: Missing environment variables");
@@ -31,7 +36,11 @@ const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token, { webHook: true });
 
 const webhookURL = `https://backend-proseed.vercel.app/bot${token}`;
-bot.setWebHook(webhookURL);
+bot.setWebHook(webhookURL).then(() => {
+  console.log(`Webhook set to ${webhookURL}`);
+}).catch(err => {
+  console.error('Error setting webhook:', err);
+});
 
 client.connect()
   .then(() => {
@@ -44,7 +53,7 @@ client.connect()
 const db = client.db(dbName);
 
 const handleError = (error, chatId, message = 'An error occurred') => {
-  console.error(error);
+  console.error('Error:', error);
   bot.sendMessage(chatId, message);
 };
 
@@ -64,6 +73,7 @@ const fetchData = async (url, options, retries = 3) => {
 app.post(`/bot${token}`, (req, res) => {
   bot.processUpdate(req.body);
   res.sendStatus(200);
+  console.log('Update received from Telegram');
 });
 
 bot.onText(/\/start/, async (msg) => {
@@ -147,6 +157,10 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+
+
+
+
 
 
 

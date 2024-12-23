@@ -5,15 +5,19 @@ const connectDB = require('./config/db');
 const fetchTelegramID = require('./api/fetchTelegramID');
 const userRoutes = require('./routes/userRoutes');
 
+// Load environment variables
 dotenv.config();
-
-const app = express();
 
 // Connect to MongoDB
 connectDB();
 
+const app = express();
+
 // Middleware to parse JSON
 app.use(express.json());
+
+// Import the bot.js to set up webhook and bot functionality
+require('./telegram/bot.js');
 
 // Define API routes
 app.get('/api/fetchTelegramID', fetchTelegramID); // GET endpoint
@@ -40,6 +44,9 @@ const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+module.exports = app;
+
 
 
 
