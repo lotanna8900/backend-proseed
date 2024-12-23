@@ -1,5 +1,6 @@
 const User = require('../models/User');
 
+// Register or update a user based on their Telegram ID
 const registerOrUpdateUser = async (telegramId, username, walletAddress = null) => {
   try {
     let user = await User.findOne({ telegramId });
@@ -67,19 +68,18 @@ const createUser = async (req, res) => {
 
 // Function to retrieve user's Telegram ID and update in user profile
 const fetchTelegramID = async (req, res) => {
-    const { telegramID } = req.body;
-    try {
-      // Corrected field name from telegramID to telegramId
-      const user = await User.findOneAndUpdate({ telegramId: telegramID }, { $set: { telegramId: telegramID } }, { new: true });
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-      }
-      res.status(200).json(user);
-    } catch (err) {
-      res.status(500).json({ message: err.message });
+  const { telegramID } = req.body;
+  try {
+    // Corrected field name from telegramID to telegramId
+    const user = await User.findOneAndUpdate({ telegramId: telegramID }, { $set: { telegramId: telegramID } }, { new: true });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
-  };
-  
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
 module.exports = {
   registerOrUpdateUser,
@@ -88,4 +88,5 @@ module.exports = {
   updateUserBalance,
   fetchTelegramID
 };
+
 
