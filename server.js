@@ -25,7 +25,8 @@ app.use('/api/users', userRoutes); // POST endpoint
 
 app.get('/health', (req, res) => res.send('Server is healthy'));
 
-const buildPath = path.join(__dirname, 'build');
+// Serve static files from the React frontend app
+const buildPath = path.join(__dirname, '..', 'frontend', 'build');
 app.use(express.static(buildPath));
 
 app.get('*', (req, res) => {

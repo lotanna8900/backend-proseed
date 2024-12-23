@@ -8,6 +8,11 @@ const { registerOrUpdateUser } = require('../controllers/userController');
 
 dotenv.config();
 
+if (!process.env.MONGO_URI || !process.env.TELEGRAM_BOT_TOKEN) {
+  console.error("Error: Missing environment variables");
+  process.exit(1);
+}
+
 const uri = process.env.MONGO_URI;
 const dbName = 'proseed';
 
@@ -142,5 +147,6 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+
 
 
