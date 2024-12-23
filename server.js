@@ -26,7 +26,7 @@ app.use('/api/users', userRoutes); // POST endpoint
 app.get('/health', (req, res) => res.send('Server is healthy'));
 
 // Serve static files from the React frontend app
-const buildPath = path.join(__dirname, '..', 'frontend', 'build');
+const buildPath = path.join(__dirname, 'frontend', 'build');
 app.use(express.static(buildPath));
 
 app.get('*', (req, res) => {
@@ -41,6 +41,7 @@ const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
 
 
 
