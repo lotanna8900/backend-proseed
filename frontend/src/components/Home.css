@@ -1,0 +1,151 @@
+/* Main container styling */
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #000; /* Black background */
+  color: #fff; /* White text */
+  min-height: 100vh;
+  padding: 20px;
+  font-family: 'Arial', sans-serif;
+  text-align: center;
+}
+
+/* User Telegram ID section */
+.user-id {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+/* Check-in button */
+.check-in button {
+  background-color: #ffcc00; /* Golden yellow button */
+  color: #000; /* Black text */
+  font-size: 1.1rem;
+  font-weight: bold;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.check-in button:hover {
+  background-color: #e6b800; /* Slightly darker yellow */
+  transform: scale(1.05); /* Slight zoom on hover */
+}
+
+.check-in button:disabled {
+  background-color: #666; /* Grey for disabled state */
+  cursor: not-allowed;
+}
+
+/* Logo styling */
+.logo {
+  margin: 20px 0;
+  height: 100;
+  border-radius: 100%; /* Makes the shape circular */
+  object-fit: cover; /* Ensures the image fits well */
+  background-color: inherit;
+}
+.blended-background {
+  background-color: inherit; /* Matches parent background */
+}
+
+
+.logo-img {
+  width: 150px;
+  height: auto;
+  border-radius: 8px; /* Slightly rounded corners */
+  background-color: inherit;
+  box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2); /* Subtle shadow for depth */
+}
+
+/* PSDT Balance section */
+.psdt-balance {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.psdt-balance h2 {
+  font-size: 1.5rem;
+  color: #ffcc00; /* Golden yellow for emphasis */
+  margin-bottom: 10px;
+}
+
+.balance-amount span {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+/* Community links section */
+.community-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px; /* Space between the links */
+  margin-top: 20px;
+}
+
+.join-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 12px 20px;
+  border: 2px solid #ffcc00; /* Golden yellow border */
+  color: #ffcc00; /* Golden yellow text */
+  border-radius: 5px;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+}
+
+.join-link:hover {
+  background-color: #ffcc00; /* Yellow fill on hover */
+  color: #000; /* Black text on hover */
+  transform: translateY(-3px); /* Slight lift on hover */
+}
+
+.community-icon {
+  font-size: 1.5rem;
+  margin-right: 10px;
+}
+
+/* Responsive styling */
+@media (max-width: 768px) {
+  .logo-img {
+    width: 120px;
+  }
+
+  .check-in button {
+    padding: 8px 16px;
+    font-size: 1rem;
+  }
+
+  .psdt-balance h2 {
+    font-size: 1.2rem;
+  }
+
+  .balance-amount span {
+    font-size: 1.5rem;
+  }
+
+  .join-link {
+    font-size: 1rem;
+    padding: 10px 15px;
+  }
+
+  .community-icon {
+    font-size: 1.2rem;
+  }
+}
+.circular-image {
+  width: 100px; /* Adjust the size as needed */
+  height: 100px; /* Must match width for a perfect circle */
+  border-radius: 50%; /* Makes the shape circular */
+  object-fit: cover; /* Ensures the image fits well */
+  background-color: transparent; /* Ensures no background color */
+}

@@ -1,0 +1,76 @@
+/* Wallet.css */
+
+/* General container styles */
+.wallet-container {
+    padding: 16px;
+    max-width: 600px;
+    margin: 0 auto; /* Centering the content */
+    color: #fff; /* Default text color */
+    font-family: 'Arial', sans-serif;
+  }
+  
+  /* PSDT Balance Card */
+  .psdt-balance-card {
+    background-color: #fff; /* White background for the card */
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
+  }
+  
+  .psdt-balance-card h3 {
+    color: #d4af37; /* Dark yellow for headings */
+    margin-bottom: 10px;
+  }
+  
+  .psdt-balance-card p {
+    color: #000; /* Black for balance text */
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  /* Wallet Connect Section */
+  .wallet-connect-section {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
+  }
+  
+  .wallet-connect-section h2 {
+    color: #d4af37; /* Dark yellow for headings */
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .connect-buttons button {
+    background-color: #ffd700; /* Golden yellow buttons */
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    margin: 10px 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+  }
+  
+  .connect-buttons button:hover {
+    background-color: #e5c100; /* Darker shade on hover */
+  }
+  
+  .connected-wallet {
+    text-align: center;
+    color: #000; /* Black for wallet info text */
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
+  }
+  
+  .connected-wallet p {
+    margin: 5px 0;
+  }
+  

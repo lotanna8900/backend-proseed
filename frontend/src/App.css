@@ -1,0 +1,19 @@
+/* Example in App.css */
+body {
+    font-size: 14px;
+  }
+  
+  /* Tablet styles */
+  @media (min-width: 768px) {
+    body {
+      font-size: 16px;
+    }
+  }
+  
+  /* Desktop styles */
+  @media (min-width: 1024px) {
+    body {
+      font-size: 18px;
+    }
+  }
+  

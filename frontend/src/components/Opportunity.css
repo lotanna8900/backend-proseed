@@ -1,0 +1,111 @@
+/* Main container */
+.opportunity-container {
+  background-color: #050505; /* Black background */
+  color: #fff; /* Default white text */
+  min-height: 100vh;
+  padding: 20px;
+  font-family: 'Arial', sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Navigation tabs */
+.nav-tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  
+}
+
+.nav-tabs button {
+  background-color: #faf6f6; /* Black background */
+  color: #ffcc00; /* Golden yellow text */
+  border: 2px solid #ffcc00; /* Golden yellow border */
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 0 10px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+}
+
+.nav-tabs button:hover {
+  background-color: #ffcc00; /* Golden yellow background */
+  color: #f3eeee; /* White text on hover */
+  transform: translateY(-3px); /* Lift effect */
+}
+  .nav-tabs .inactive-tab {
+    background-color: #ffcc00; /* Golden yellow background for active tab */
+    color: #f3f0f0; /* White text */
+}
+
+/* Content area */
+.opportunity-content {
+  display: flex;
+  flex-direction: column; /* Arrange cards in a vertical line */
+  align-items: center; /* Center cards horizontally */
+  gap: 20px; /* Space between cards */
+  width: 100%; /* Take full width of the container */
+}
+
+/* Cards */
+.opportunity-card {
+  background-color: #fff; /* White card background */
+  color: #000; /* Black text for smaller content */
+  border-radius: 8px;
+  padding: 20px;
+  width: 80%; /* Cards take 80% of the container's width */
+  max-width: 400px; /* Set a maximum width for better readability */
+  box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1); /* Subtle shadow */
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.opportunity-card:hover {
+  transform: scale(1.05); /* Slight zoom on hover */
+  box-shadow: 0 8px 16px rgba(255, 204, 0, 0.4); /* Glow effect on hover */
+  
+}
+
+.opportunity-card h3 {
+  font-size: 1.4rem;
+  color: #d4a017; /* Darker yellow text for titles */
+  margin-bottom: 10px;
+}
+
+.opportunity-card p {
+  font-size: 1rem;
+  color: #000; /* Black text for descriptions */
+  margin-bottom: 20px;
+}
+
+/* Apply button */
+.apply-button {
+  display: inline-block;
+  background-color: #ffcc00; /* Golden yellow button */
+  color: #000; /* Black text */
+  padding: 10px 15px;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.apply-button:hover {
+  background-color: #e6b800; /* Slightly darker yellow */
+  transform: scale(1.05); /* Slight zoom on hover */
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .opportunity-card {
+    width: 90%; /* Adjust card width for smaller screens */
+  }
+
+  .nav-tabs button {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+}
