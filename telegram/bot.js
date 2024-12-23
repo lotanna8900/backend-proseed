@@ -85,7 +85,7 @@ bot.onText(/\/start/, async (msg) => {
           [
             {
               text: 'Start App',
-              web_app: { url: 'https://proseedtesting.netlify.app/app' },
+              web_app: { url: 'https://backend-proseed.vercel.app/app' }, // Updated link
             },
           ],
         ],
@@ -147,6 +147,7 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+
 
 
 
