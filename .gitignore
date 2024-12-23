@@ -29,11 +29,12 @@ frontend/node_modules/
 
 # Build directories
 build/
-# Comment out this line if 'build' directory should not be ignored
+# Ensure the build directory is not ignored for frontend
 #frontend/build/
 
 # dotenv environment variables file
-.env
+# Ensure .env is not ignored for deployment
+#.env
 
 # Mac system files
 .DS_Store
