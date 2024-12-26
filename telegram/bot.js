@@ -70,13 +70,26 @@ const fetchData = async (url, options, retries = 3) => {
   }
 };
 
+// Define the route to handle webhook requests
 app.post(`/bot${token}`, (req, res) => {
-  bot.processUpdate(req.body);
+  console.log('Update received:', req.body);
+  const update = req.body;
+
+  if (!update || !update.update_id || !update.message) {
+    console.error('Invalid update received:', update);
+    return res.sendStatus(400);
+  }
+
+  bot.processUpdate(update);
   res.sendStatus(200);
-  console.log('Update received from Telegram');
+});
+
+bot.on('message', (msg) => {
+  console.log('Message received:', msg);
 });
 
 bot.onText(/\/start/, async (msg) => {
+  console.log('/start command received:', msg);
   const chatId = msg.chat.id;
   let username = msg.from.username || `${msg.from.first_name} ${msg.from.last_name}`.trim() || msg.from.first_name;
 
@@ -95,7 +108,7 @@ bot.onText(/\/start/, async (msg) => {
           [
             {
               text: 'Start App',
-              web_app: { url: 'https://backend-proseed.vercel.app/app' }, // Updated link
+              web_app: { url: 'https://backend-proseed.vercel.app/app' },
             },
           ],
         ],
@@ -109,6 +122,7 @@ bot.onText(/\/start/, async (msg) => {
 });
 
 bot.onText(/\/balance/, async (msg) => {
+  console.log('/balance command received:', msg);
   const chatId = msg.chat.id;
   try {
     const user = await db.collection('users').findOne({ telegramId: chatId });
@@ -123,6 +137,7 @@ bot.onText(/\/balance/, async (msg) => {
 });
 
 bot.onText(/\/register/, async (msg) => {
+  console.log('/register command received:', msg);
   const chatId = msg.chat.id;
   try {
     const user = await registerOrUpdateUser(chatId, msg.from.username || `${msg.from.first_name} ${msg.from.last_name}`.trim() || msg.from.first_name);
@@ -133,6 +148,7 @@ bot.onText(/\/register/, async (msg) => {
 });
 
 bot.onText(/\/fetchID/, async (msg) => {
+  console.log('/fetchID command received:', msg);
   const chatId = msg.chat.id;
   try {
     const user = await db.collection('users').findOne({ telegramId: chatId });
@@ -157,6 +173,10 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+
+
+
+
 
 
 
