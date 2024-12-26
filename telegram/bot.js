@@ -33,14 +33,7 @@ app.use(express.json());
 app.use(limiter);
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
-const bot = new TelegramBot(token, { webHook: true });
-
-const webhookURL = `https://backend-proseed.vercel.app/bot${token}`;
-bot.setWebHook(webhookURL).then(() => {
-  console.log(`Webhook set to ${webhookURL}`);
-}).catch(err => {
-  console.error('Error setting webhook:', err);
-});
+const bot = new TelegramBot(token, { polling: true });
 
 client.connect()
   .then(() => {
@@ -69,20 +62,6 @@ const fetchData = async (url, options, retries = 3) => {
     }
   }
 };
-
-// Define the route to handle webhook requests
-app.post(`/bot${token}`, (req, res) => {
-  console.log('Update received:', req.body);
-  const update = req.body;
-
-  if (!update || !update.update_id || !update.message) {
-    console.error('Invalid update received:', update);
-    return res.sendStatus(400);
-  }
-
-  bot.processUpdate(update);
-  res.sendStatus(200);
-});
 
 bot.on('message', (msg) => {
   console.log('Message received:', msg);
@@ -173,15 +152,3 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
-
-
-
-
-
-
-
-
-
-
-
-
