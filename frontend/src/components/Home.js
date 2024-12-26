@@ -16,21 +16,29 @@ const Home = () => {
   const [telegramID, setTelegramID] = useState('');
 
   useEffect(() => {
-    const fetchTelegramIDFromServer = async (id) => {
+    const fetchUserData = async (id) => {
       try {
-        const response = await fetch(`https://backend-proseed.vercel.app/api/fetchTelegramID?telegramId=${id}`);
+        const response = await fetch(`https://backend-proseed.vercel.app/api/users/${id}`);
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        setTelegramID(data.telegramID || 'Loading...');
+        setPsdtBalance(data.psdtBalance || 0);
+        setTelegramID(data.telegramId || 'Loading...');
         // Store Telegram ID in local storage
-        localStorage.setItem('telegramId', data.telegramID || 'Error loading ID');
+        localStorage.setItem('telegramId', data.telegramId || 'Error loading ID');
       } catch (error) {
-        console.error('Error fetching Telegram ID:', error);
+        console.error('Error fetching user data:', error);
         setTelegramID('Error loading ID');
       }
     };
+  
+    // Fetch user data from server if telegramId is available
+    if (telegramId) {
+      fetchUserData(telegramId);
+    }
+  }, [telegramId]);
+  
 
     // Fetch Telegram ID from local storage or server if telegramId is available
     const storedTelegramID = localStorage.getItem('telegramId');
@@ -43,11 +51,29 @@ const Home = () => {
 
   const handleCheckIn = async () => {
     if (!checkInStatus) {
-      await handleDailyCheckIn(); // Update context to reflect check-in status
-      setPsdtBalance((prevBalance) => prevBalance + 100); // Add +100 PSDT to balance
-      alert('Successfully checked in! +100 PSDT added to your balance.');
+      try {
+        const response = await fetch('https://backend-proseed.vercel.app/api/users/dailyCheckIn', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ telegramId }),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+  
+        const data = await response.json();
+        setPsdtBalance(data.psdtBalance); // Update balance from server response
+        alert('Successfully checked in! +100 PSDT added to your balance.');
+      } catch (error) {
+        console.error('Error during check-in:', error);
+        alert('Error during check-in. Please try again later.');
+      }
     }
   };
+  
 
   return (
     <div className="home-container">

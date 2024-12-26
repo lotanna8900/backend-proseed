@@ -19,15 +19,20 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
-  telegramId: { // Add this field
+  telegramId: {
     type: String,
     unique: true,
+  },
+  lastCheckIn: {
+    type: Date,
+    default: null,
   },
   createdAt: {
     type: Date,
     default: Date.now,
   },
 });
+
 
 module.exports = mongoose.model('User', userSchema);
 

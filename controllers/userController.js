@@ -81,12 +81,41 @@ const fetchTelegramID = async (req, res) => {
   }
 };
 
+// Handle daily check-in and update user balance
+const handleDailyCheckIn = async (req, res) => {
+  const { telegramId } = req.body;
+  try {
+    const user = await User.findOne({ telegramId });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if the user has already checked in today
+    const lastCheckIn = user.lastCheckIn || new Date(0);
+    const now = new Date();
+    if (now.toDateString() === lastCheckIn.toDateString()) {
+      return res.status(400).json({ message: 'Already checked in today' });
+    }
+
+    // Update the user's balance and last check-in date
+    user.psdtBalance += 100; // Add 100 PSDT to the balance
+    user.lastCheckIn = now;
+    await user.save();
+
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 module.exports = {
   registerOrUpdateUser,
   createUser,
   getUserById,
   updateUserBalance,
-  fetchTelegramID
+  fetchTelegramID,
+  handleDailyCheckIn
 };
+
 
 
