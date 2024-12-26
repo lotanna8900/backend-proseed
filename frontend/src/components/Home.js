@@ -32,20 +32,10 @@ const Home = () => {
         setTelegramID('Error loading ID');
       }
     };
-  
+
     // Fetch user data from server if telegramId is available
     if (telegramId) {
       fetchUserData(telegramId);
-    }
-  }, [telegramId]);
-  
-
-    // Fetch Telegram ID from local storage or server if telegramId is available
-    const storedTelegramID = localStorage.getItem('telegramId');
-    if (storedTelegramID) {
-      setTelegramID(storedTelegramID);
-    } else if (telegramId) {
-      fetchTelegramIDFromServer(telegramId);
     }
   }, [telegramId]);
 
@@ -59,11 +49,11 @@ const Home = () => {
           },
           body: JSON.stringify({ telegramId }),
         });
-  
+
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-  
+
         const data = await response.json();
         setPsdtBalance(data.psdtBalance); // Update balance from server response
         alert('Successfully checked in! +100 PSDT added to your balance.');
@@ -73,7 +63,6 @@ const Home = () => {
       }
     }
   };
-  
 
   return (
     <div className="home-container">
@@ -123,6 +112,7 @@ const Home = () => {
 };
 
 export default Home;
+
 
 
 
