@@ -64,17 +64,22 @@ export const AppProvider = ({ children }) => {
 
   const handleDailyCheckIn = async () => {
     if (!checkInStatus) {
-      const newBalance = psdtBalance + 100;
       try {
-        await fetch('https://backend-proseed.vercel.app/api/updateBalance', {
+        const response = await fetch('https://backend-proseed.vercel.app/api/users/dailyCheckIn', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: user._id, newBalance }),
+          body: JSON.stringify({ telegramId: user.telegramId }),
         });
-        setPsdtBalance(newBalance);
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        setPsdtBalance(data.psdtBalance); // Update balance from server response
         setCheckInStatus(true);
       } catch (error) {
-        console.error('Error updating balance:', error);
+        console.error('Error during check-in:', error);
       }
     }
   };

@@ -8,7 +8,6 @@ const Home = () => {
   const {
     psdtBalance,
     setPsdtBalance,
-    handleDailyCheckIn,
     checkInStatus,
     telegramId, // Assume this is coming from your context or retrieved from storage
   } = useAppContext(); // Use the custom hook to access context
@@ -37,7 +36,7 @@ const Home = () => {
     if (telegramId) {
       fetchUserData(telegramId);
     }
-  }, [telegramId]);
+  }, [telegramId, setPsdtBalance]);
 
   const handleCheckIn = async () => {
     if (!checkInStatus) {
@@ -112,6 +111,7 @@ const Home = () => {
 };
 
 export default Home;
+
 
 
 
