@@ -11,7 +11,7 @@ const registerOrUpdateUser = async (telegramId, username, walletAddress = null) 
         username: username || telegramId,
         walletAddress,
         telegramId,
-        psdtBalance: 0,
+        psdtBalance: 1000, // Initial balance set to 1000
       });
       await user.save();
     } else {

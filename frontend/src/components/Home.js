@@ -23,7 +23,7 @@ const Home = () => {
           throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        setPsdtBalance(data.psdtBalance || 0);
+        setPsdtBalance(data.psdtBalance || 1000); // Ensure initial balance is 1000
         setTelegramID(data.telegramId || 'Loading...');
         // Store Telegram ID in local storage
         localStorage.setItem('telegramId', data.telegramId || 'Error loading ID');
@@ -113,6 +113,8 @@ const Home = () => {
 };
 
 export default Home;
+
+
 
 
 
