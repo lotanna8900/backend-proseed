@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useAppContext } from '../Context/AppContext.js'; // Add .js extension
 import NavigationBar from './NavigationBar.js'; // Add .js extension
 import './Home.css'; // CSS for styling the Home segment
@@ -108,6 +108,7 @@ const Home = () => {
 };
 
 export default Home;
+
 
 
 
