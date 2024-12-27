@@ -9,6 +9,7 @@ const Home = () => {
     psdtBalance,
     setPsdtBalance,
     checkInStatus,
+    setCheckInStatus, // Ensure this is included
     telegramId, // Assume this is coming from your context or retrieved from storage
   } = useAppContext(); // Use the custom hook to access context
 
@@ -55,6 +56,7 @@ const Home = () => {
 
         const data = await response.json();
         setPsdtBalance(data.psdtBalance); // Update balance from server response
+        setCheckInStatus(true); // Update check-in status
         alert('Successfully checked in! +100 PSDT added to your balance.');
       } catch (error) {
         console.error('Error during check-in:', error);
@@ -111,6 +113,7 @@ const Home = () => {
 };
 
 export default Home;
+
 
 
 

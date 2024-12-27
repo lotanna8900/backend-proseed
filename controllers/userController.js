@@ -81,7 +81,6 @@ const fetchTelegramID = async (req, res) => {
   }
 };
 
-// Handle daily check-in and update user balance
 const handleDailyCheckIn = async (req, res) => {
   const { telegramId } = req.body;
   try {
@@ -107,6 +106,7 @@ const handleDailyCheckIn = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 module.exports = {
   registerOrUpdateUser,
