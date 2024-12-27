@@ -27,10 +27,10 @@ const registerOrUpdateUser = async (telegramId, username, walletAddress = null) 
   }
 };
 
-// Get user data by ID
-const getUserById = async (req, res) => {
+// Get user data by Telegram ID
+const getUserByTelegramId = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findOne({ telegramId: req.params.telegramId });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -114,8 +114,6 @@ module.exports = {
   getUserById,
   updateUserBalance,
   fetchTelegramID,
-  handleDailyCheckIn
+  handleDailyCheckIn,
+  getUserByTelegramId
 };
-
-
-
