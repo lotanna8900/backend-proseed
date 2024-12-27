@@ -27,6 +27,19 @@ const registerOrUpdateUser = async (telegramId, username, walletAddress = null) 
   }
 };
 
+// Get user data by MongoDB ObjectId
+const getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 // Get user data by Telegram ID
 const getUserByTelegramId = async (req, res) => {
   try {
@@ -107,13 +120,12 @@ const handleDailyCheckIn = async (req, res) => {
   }
 };
 
-
 module.exports = {
   registerOrUpdateUser,
   createUser,
   getUserById,
+  getUserByTelegramId,
   updateUserBalance,
   fetchTelegramID,
-  handleDailyCheckIn,
-  getUserByTelegramId
+  handleDailyCheckIn
 };
