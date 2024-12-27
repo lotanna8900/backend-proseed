@@ -25,6 +25,7 @@ const Home = () => {
         const data = await response.json();
         setPsdtBalance(data.psdtBalance || 1000); // Ensure initial balance is 1000
         setTelegramID(data.telegramId || 'Loading...');
+        setCheckInStatus(data.lastCheckIn && new Date(data.lastCheckIn).toDateString() === new Date().toDateString());
         // Store Telegram ID in local storage
         localStorage.setItem('telegramId', data.telegramId || 'Error loading ID');
       } catch (error) {
@@ -37,7 +38,7 @@ const Home = () => {
     if (telegramId) {
       fetchUserData(telegramId);
     }
-  }, [telegramId, setPsdtBalance]);
+  }, [telegramId, setPsdtBalance, setCheckInStatus]);
 
   const handleCheckIn = async () => {
     if (!checkInStatus) {
@@ -113,6 +114,7 @@ const Home = () => {
 };
 
 export default Home;
+
 
 
 
