@@ -11,6 +11,7 @@ export const AppProvider = ({ children }) => {
   const [walletAddress, setWalletAddress] = useState('');
   const [loading, setLoading] = useState(true);
   const [checkInStatus, setCheckInStatus] = useState(false);
+  const [telegramId, setTelegramId] = useState(''); // Add telegramId state
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -19,6 +20,7 @@ export const AppProvider = ({ children }) => {
         const response = await axios.get(`https://backend-proseed.vercel.app/api/users/${walletAddress}`);
         setUser(response.data);
         setPsdtBalance(response.data.psdtBalance || 0); // Handle case where psdtBalance might be undefined
+        setTelegramId(response.data.telegramId || ''); // Set telegramId
         setLoading(false);
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -38,6 +40,7 @@ export const AppProvider = ({ children }) => {
       });
       const data = await response.json();
       setUser(data);
+      setTelegramId(data.telegramId); // Set telegramId
     } catch (error) {
       console.error('Error registering user:', error);
     }
@@ -111,6 +114,7 @@ export const AppProvider = ({ children }) => {
       });
       const data = await response.json();
       setUser((prevUser) => ({ ...prevUser, telegramID: data.telegramID }));
+      setTelegramId(data.telegramID); // Set telegramId
     } catch (error) {
       console.error('Error fetching Telegram ID:', error);
     }
@@ -130,6 +134,8 @@ export const AppProvider = ({ children }) => {
         handleDailyCheckIn,
         checkInStatus,
         registerUserAutomatically,
+        telegramId, // Include telegramId in context
+        setTelegramId, // Include setTelegramId in context
       }}
     >
       {children}
@@ -145,3 +151,4 @@ export const useAppContext = () => {
   }
   return context;
 };
+
