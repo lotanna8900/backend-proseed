@@ -68,7 +68,7 @@ const Home = () => {
       </div>
 
       {/* Daily Check-in Button */}
-      <div className="check-in">
+      <div class="check-in">
         <button onClick={handleCheckIn} disabled={checkInStatus}>
           {checkInStatus ? 'Checked In' : 'Daily Check-in (+100 PSDT)'}
         </button>
@@ -108,6 +108,7 @@ const Home = () => {
 };
 
 export default Home;
+
 
 
 
