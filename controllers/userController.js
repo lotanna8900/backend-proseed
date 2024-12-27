@@ -40,19 +40,18 @@ const getUserById = async (req, res) => {
   }
 };
 
-// Commented out for testing
 // Get user data by Telegram ID
-// const getUserByTelegramId = async (req, res) => {
-//   try {
-//     const user = await User.findOne({ telegramId: req.params.telegramId });
-//     if (!user) {
-//       return res.status(404).json({ message: 'User not found' });
-//     }
-//     res.status(200).json(user);
-//   } catch (err) {
-//     res.status(500).json({ message: err.message });
-//   }
-// };
+const getUserByTelegramId = async (req, res) => {
+  try {
+    const user = await User.findOne({ telegramId: req.params.telegramId });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
 // Update user PSDT balance
 const updateUserBalance = async (req, res) => {
@@ -125,7 +124,7 @@ module.exports = {
   registerOrUpdateUser,
   createUser,
   getUserById,
-  // getUserByTelegramId, // Commented out for testing
+  getUserByTelegramId,
   updateUserBalance,
   fetchTelegramID,
   handleDailyCheckIn
