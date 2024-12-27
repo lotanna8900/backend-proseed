@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
@@ -23,18 +24,18 @@ app.use('/api', userRoutes); // Use /api prefix for all user routes
 // Health check endpoint
 app.get('/health', (req, res) => res.send('Server is healthy'));
 
-// Temporarily remove the code that serves the frontend
-// const buildPath = path.join(__dirname, 'frontend', 'build');
-// app.use(express.static(buildPath));
+// Serve static files from the React frontend app
+const buildPath = path.join(__dirname, 'frontend', 'build');
+app.use(express.static(buildPath));
 
-// Serve the frontend's index.html for all other routes
-// app.get('*', (req, res) => {
-//   res.sendFile(path.join(buildPath, 'index.html'), (err) => {
-//     if (err) {
-//       res.status(500).send(err);
-//     }
-//   });
-// });
+// Client-side routing handler
+app.get('/*', (req, res) => {
+  res.sendFile(path.join(buildPath, 'index.html'), (err) => {
+    if (err) {
+      res.status(500).send(err);
+    }
+  });
+});
 
 // Start the server
 const PORT = process.env.PORT || 3001;

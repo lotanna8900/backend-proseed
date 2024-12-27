@@ -8,6 +8,6 @@ router.get('/id/:id', getUserById); // Updated route to avoid conflict
 router.put('/:id/balance', updateUserBalance);
 router.post('/fetchTelegramID', fetchTelegramID);
 router.post('/dailyCheckIn', handleDailyCheckIn);
-router.get('/telegram/:telegramId', getUserByTelegramId); // Reintroduced route
+router.get('/telegram/:telegramId', getUserByTelegramId); // Updated route to avoid conflict
 
 module.exports = router;
