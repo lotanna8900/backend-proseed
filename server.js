@@ -28,8 +28,8 @@ app.get('/health', (req, res) => res.send('Server is healthy'));
 const buildPath = path.join(__dirname, 'frontend', 'build');
 app.use(express.static(buildPath));
 
-// Serve the frontend's index.html for all other routes
-app.get('*', (req, res) => {
+// Client-side routing handler
+app.get('/*', (req, res) => {
   res.sendFile(path.join(buildPath, 'index.html'), (err) => {
     if (err) {
       res.status(500).send(err);
