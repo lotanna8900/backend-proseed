@@ -15,14 +15,14 @@ const app = express();
 // Middleware to parse JSON
 app.use(express.json());
 
-// Import the bot.js to set up webhook and bot functionality
-require('./telegram/bot.js');
-
 // Define API routes
 app.use('/api', userRoutes); // Use /api prefix for all user routes
 
 // Health check endpoint
 app.get('/health', (req, res) => res.send('Server is healthy'));
+
+// Import the bot.js to set up webhook and bot functionality
+require('./telegram/bot.js');
 
 // Serve static files from the React frontend app
 const buildPath = path.join(__dirname, 'frontend', 'build');
