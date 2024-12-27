@@ -13,8 +13,6 @@ const Home = () => {
     telegramId, // Assume this is coming from your context or retrieved from storage
   } = useAppContext(); // Use the custom hook to access context
 
-  const [telegramID, setTelegramID] = useState('');
-
   useEffect(() => {
     const fetchUserData = async (id) => {
       try {
@@ -24,13 +22,9 @@ const Home = () => {
         }
         const data = await response.json();
         setPsdtBalance(data.psdtBalance || 1000); // Ensure initial balance is 1000
-        setTelegramID(data.telegramId || 'Loading...');
         setCheckInStatus(data.lastCheckIn && new Date(data.lastCheckIn).toDateString() === new Date().toDateString());
-        // Store Telegram ID in local storage
-        localStorage.setItem('telegramId', data.telegramId || 'Error loading ID');
       } catch (error) {
         console.error('Error fetching user data:', error);
-        setTelegramID('Error loading ID');
       }
     };
 
@@ -70,7 +64,7 @@ const Home = () => {
     <div className="home-container">
       {/* Display User's Telegram ID */}
       <div className="user-id">
-        <span>Telegram ID: {telegramID}</span> {/* Display Telegram ID */}
+        <span>Telegram ID: {telegramId}</span> {/* Display Telegram ID */}
       </div>
 
       {/* Daily Check-in Button */}
