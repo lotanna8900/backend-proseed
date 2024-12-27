@@ -4,11 +4,12 @@ const { createUser, getUserById, updateUserBalance, fetchTelegramID, handleDaily
 const router = express.Router();
 
 router.post('/register', createUser);
-router.get('/:id', getUserById);
+router.get('/id/:id', getUserById); // Updated route to avoid conflict
 router.put('/:id/balance', updateUserBalance);
 router.post('/fetchTelegramID', fetchTelegramID);
 router.post('/dailyCheckIn', handleDailyCheckIn);
-router.get('/users/:telegramId', getUserByTelegramId); 
+router.get('/telegram/:telegramId', getUserByTelegramId); // Updated route to avoid conflict
 
 module.exports = router;
+
 
