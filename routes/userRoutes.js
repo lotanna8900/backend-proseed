@@ -11,4 +11,3 @@ router.post('/dailyCheckIn', handleDailyCheckIn);
 router.get('/telegram/:telegramId', getUserByTelegramId); // Updated route to avoid conflict
 
 module.exports = router;
-
