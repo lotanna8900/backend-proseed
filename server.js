@@ -2,7 +2,6 @@ const express = require('express');
 const path = require('path');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
-const fetchTelegramID = require('./api/fetchTelegramID');
 const userRoutes = require('./routes/userRoutes');
 
 // Load environment variables
@@ -20,8 +19,7 @@ app.use(express.json());
 require('./telegram/bot.js');
 
 // Define API routes
-app.get('/api/fetchTelegramID', fetchTelegramID); // GET endpoint
-app.use('/api/users', userRoutes); // POST endpoint
+app.use('/api', userRoutes); // Use /api prefix for all user routes
 
 // Health check endpoint
 app.get('/health', (req, res) => res.send('Server is healthy'));
@@ -46,7 +44,3 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
-
-
-
-

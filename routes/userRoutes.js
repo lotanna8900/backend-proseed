@@ -12,4 +12,3 @@ router.get('/telegram/:telegramId', getUserByTelegramId); // Updated route to av
 
 module.exports = router;
 
-
