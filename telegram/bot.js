@@ -1,17 +1,14 @@
 const express = require('express');
 const TelegramBot = require('node-telegram-bot-api');
 const { MongoClient } = require('mongodb');
-const rateLimit = require('express-rate-limit');
 const dotenv = require('dotenv');
 const path = require('path');
 const axios = require('axios');
+const rateLimit = require('express-rate-limit');
 const { registerOrUpdateUser } = require('../controllers/userController');
 
 // Load environment variables from the root directory
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
-
-console.log("MONGO_URI:", process.env.MONGO_URI); // Log Mongo URI
-console.log("TELEGRAM_BOT_TOKEN:", process.env.TELEGRAM_BOT_TOKEN); // Log Telegram Bot Token
 
 if (!process.env.MONGO_URI || !process.env.TELEGRAM_BOT_TOKEN) {
   console.error("Error: Missing environment variables");
@@ -20,49 +17,43 @@ if (!process.env.MONGO_URI || !process.env.TELEGRAM_BOT_TOKEN) {
 
 const uri = process.env.MONGO_URI;
 const dbName = 'proseed';
-
 const client = new MongoClient(uri);
-
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-});
-
-const app = express();
-app.use(express.json());
-app.use(limiter);
-
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
 
-client.connect()
-  .then(() => {
+// Express server setup
+const app = express();
+app.use(express.json());  // Middleware to parse incoming JSON requests
+
+// Rate limiter setup to limit requests to 100 per 15 minutes
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,  // Limit each IP to 100 requests per window
+});
+app.use(limiter);  // Apply rate limiter globally
+
+// Async function to connect to MongoDB
+const connectDb = async () => {
+  try {
+    await client.connect();
     console.log('MongoDB Connected');
-  })
-  .catch(err => {
+    return client.db(dbName);  // Return the db instance
+  } catch (err) {
     console.error('MongoDB connection error:', err);
-  });
+    process.exit(1);  // Exit if connection fails
+  }
+};
 
-const db = client.db(dbName);
+// Establish MongoDB connection
+const db = await connectDb(); // Await the connection before proceeding
 
+// Error handler utility
 const handleError = (error, chatId, message = 'An error occurred') => {
   console.error('Error:', error);
   bot.sendMessage(chatId, message);
 };
 
-const fetchData = async (url, options, retries = 3) => {
-  try {
-    const response = await axios.get(url, options);
-    return response.data;
-  } catch (error) {
-    if (retries > 0) {
-      return fetchData(url, options, retries - 1);
-    } else {
-      throw error;
-    }
-  }
-};
-
+// Bot event handlers
 bot.on('message', (msg) => {
   console.log('Message received:', msg);
 });
@@ -79,7 +70,6 @@ bot.onText(/\/start/, async (msg) => {
 
   try {
     const user = await registerOrUpdateUser(chatId, username);
-
     const welcomeMessage = `Welcome to proSEED, ${user.username}!\nYour ID: ${user.telegramId}`;
     const options = {
       reply_markup: {
@@ -132,7 +122,7 @@ bot.onText(/\/fetchID/, async (msg) => {
   try {
     const user = await db.collection('users').findOne({ telegramId: chatId });
     if (user) {
-      await db.collection('users').updateOne({ telegramId: chatId }, { $set: { telegramID: chatId } });
+      await db.collection('users').updateOne({ telegramId: chatId }, { $set: { telegramId: chatId } });
       bot.sendMessage(chatId, 'Telegram ID saved successfully.');
     } else {
       bot.sendMessage(chatId, 'User not found.');
@@ -142,13 +132,16 @@ bot.onText(/\/fetchID/, async (msg) => {
   }
 });
 
+// Health check endpoint to monitor bot's status
 app.get('/health', (req, res) => {
   res.send('Bot service is running');
 });
 
+// Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-module.exports = app;
+module.exports = app; // Export app to be used in larger module or testing
+

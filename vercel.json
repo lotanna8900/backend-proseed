@@ -4,18 +4,9 @@
     {
       "src": "server.js",
       "use": "@vercel/node"
-    },
-    {
-      "src": "frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": { "distDir": "build" }
     }
   ],
   "routes": [
-    {
-      "src": "/bot(.*)",
-      "dest": "/server.js"
-    },
     {
       "src": "/api/(.*)",
       "dest": "/server.js"
@@ -25,7 +16,9 @@
       "dest": "/server.js"
     }
   ],
-  "installCommand": "npm install && cd frontend && npm install"
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
 
 

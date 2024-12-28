@@ -3,44 +3,50 @@ const path = require('path');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
+const cors = require('cors');
 
 // Load environment variables
 dotenv.config();
 
-// Connect to MongoDB
-connectDB();
-
+// Create express app
 const app = express();
 
-// Middleware to parse JSON
+// Connect to MongoDB only if not already connected
+if (process.env.NODE_ENV !== 'test') {
+  connectDB();
+}
+
+// Middleware
+app.use(cors());
 app.use(express.json());
 
-// Define API routes
-app.use('/api', userRoutes); // Use /api prefix for all user routes
+// API Routes
+app.use('/api/users', userRoutes);
 
 // Health check endpoint
-app.get('/health', (req, res) => res.send('Server is healthy'));
+app.get('/api/health', (req, res) => res.send('Server is healthy'));
 
-// Import the bot.js to set up webhook and bot functionality
-require('./telegram/bot.js');
+// Import bot only in development
+if (process.env.NODE_ENV === 'development') {
+  require('./telegram/bot.js');
+}
 
-// Serve static files from the React frontend app
-const buildPath = path.join(__dirname, 'frontend', 'build');
-app.use(express.static(buildPath));
-
-// Client-side routing handler
-app.get('/*', (req, res) => {
-  res.sendFile(path.join(buildPath, 'index.html'), (err) => {
-    if (err) {
-      res.status(500).send(err);
-    }
+// Serve static files in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'frontend/build')));
+  
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
   });
-});
+}
 
-// Start the server
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// Start server only in development
+if (process.env.NODE_ENV === 'development') {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
 
+// Export for serverless
 module.exports = app;
