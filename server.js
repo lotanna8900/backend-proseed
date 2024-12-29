@@ -33,9 +33,14 @@ if (process.env.NODE_ENV === 'development') {
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
+  // Serve all files in build directory
   app.use(express.static(path.join(__dirname, 'frontend/build')));
-  
+
+  // Handle unknown routes: Serve React's index.html for non-API paths
   app.get('*', (req, res) => {
+    if (req.path.startsWith('/api')) {
+      return res.status(404).send('API route not found');
+    }
     res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
   });
 }

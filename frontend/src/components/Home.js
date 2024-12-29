@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useAppContext } from '../Context/AppContext.js'; // Add .js extension
 import NavigationBar from './NavigationBar.js'; // Add .js extension
+import DailyCheckIn from './DailyCheckIn.js'; // Import the DailyCheckIn component
 import './Home.css'; // CSS for styling the Home segment
 import { FaTelegram, FaTwitter } from 'react-icons/fa'; // Icons for community links
 
@@ -11,6 +12,7 @@ const Home = () => {
     checkInStatus,
     setCheckInStatus, // Ensure this is included
     telegramId, // Assume this is coming from your context or retrieved from storage
+    user, // Add user from context
   } = useAppContext(); // Use the custom hook to access context
 
   useEffect(() => {
@@ -34,45 +36,25 @@ const Home = () => {
     }
   }, [telegramId, setPsdtBalance, setCheckInStatus]);
 
-  const handleCheckIn = async () => {
-    if (!checkInStatus) {
-      try {
-        const response = await fetch('https://backend-proseed.vercel.app/api/users/dailyCheckIn', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ telegramId }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-
-        const data = await response.json();
-        setPsdtBalance(data.psdtBalance); // Update balance from server response
-        setCheckInStatus(true); // Update check-in status
-        alert('Successfully checked in! +100 PSDT added to your balance.');
-      } catch (error) {
-        console.error('Error during check-in:', error);
-        alert('Error during check-in. Please try again later.');
-      }
-    }
-  };
-
   return (
     <div className="home-container">
+      <h1>Welcome to Proseed</h1>
+      {user ? (
+        <div>
+          <p>Telegram ID: {telegramId || 'Not linked yet'}</p>
+          {/* Add more user information here */}
+        </div>
+      ) : (
+        <p>Loading user data...</p>
+      )}
+
       {/* Display User's Telegram ID */}
       <div className="user-id">
         <span>Telegram ID: {telegramId}</span> {/* Display Telegram ID */}
       </div>
 
       {/* Daily Check-in Button */}
-      <div class="check-in">
-        <button onClick={handleCheckIn} disabled={checkInStatus}>
-          {checkInStatus ? 'Checked In' : 'Daily Check-in (+100 PSDT)'}
-        </button>
-      </div>
+      <DailyCheckIn /> {/* Use the DailyCheckIn component */}
 
       {/* proSEED Logo */}
       <div className="logo">
@@ -108,22 +90,3 @@ const Home = () => {
 };
 
 export default Home;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

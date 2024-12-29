@@ -81,10 +81,13 @@ const createUser = async (req, res) => {
 
 // Function to retrieve user's Telegram ID and update in user profile
 const fetchTelegramID = async (req, res) => {
-  const { telegramID } = req.body;
+  const { telegramId } = req.body; // Use lowercase "telegramId" here
   try {
-    // Corrected field name from telegramID to telegramId
-    const user = await User.findOneAndUpdate({ telegramId: telegramID }, { $set: { telegramId: telegramID } }, { new: true });
+    const user = await User.findOneAndUpdate(
+      { telegramId },
+      { $set: { telegramId } },
+      { new: true }
+    );
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }

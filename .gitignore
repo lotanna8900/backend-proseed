@@ -28,7 +28,6 @@ jspm_packages/
 frontend/node_modules/
 
 # Build directories
-build/
 # Ensure the build directory is not ignored for frontend
 #frontend/build/
 

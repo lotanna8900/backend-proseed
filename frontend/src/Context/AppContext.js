@@ -31,9 +31,24 @@ export const AppProvider = ({ children }) => {
     fetchUserData();
   }, [walletAddress]);
 
+  const fetchUserByTelegramId = async (telegramId) => {
+    try {
+      const response = await fetch(`https://backend-proseed.vercel.app/api/users/byTelegramId/${telegramId}`);
+      const userData = await response.json();
+      if (response.ok) {
+        setUser(userData); // Update user data
+        setTelegramId(userData.telegramId); // Set Telegram ID
+      } else {
+        console.error('Error fetching user by Telegram ID:', userData.message);
+      }
+    } catch (error) {
+      console.error('Error fetching user by Telegram ID:', error);
+    }
+  };
+
   const registerUserAutomatically = async (telegramUser) => {
     try {
-      const response = await fetch('https://backend-proseed.vercel.app/api/registerUser', {
+      const response = await fetch('https://backend-proseed.vercel.app/api/users/registerUser', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: telegramUser.username, telegramID: telegramUser.id }),
@@ -52,7 +67,7 @@ export const AppProvider = ({ children }) => {
       return;
     }
     try {
-      const response = await fetch('https://backend-proseed.vercel.app/api/updateBalance', {
+      const response = await fetch('https://backend-proseed.vercel.app/api/users/updateBalance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user._id, newBalance }),
@@ -66,24 +81,26 @@ export const AppProvider = ({ children }) => {
   };
 
   const handleDailyCheckIn = async () => {
-    if (!checkInStatus) {
+    if (!checkInStatus && telegramId) {
       try {
         const response = await fetch('https://backend-proseed.vercel.app/api/users/dailyCheckIn', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ telegramId: user.telegramId }),
+          body: JSON.stringify({ telegramId }),
         });
 
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-
         const data = await response.json();
-        setPsdtBalance(data.psdtBalance); // Update balance from server response
-        setCheckInStatus(true);
+        if (response.ok) {
+          setPsdtBalance(data.psdtBalance); // Update balance from server response
+          setCheckInStatus(true); // Mark as checked in
+        } else {
+          console.error('Daily check-in failed:', data.message);
+        }
       } catch (error) {
         console.error('Error during check-in:', error);
       }
+    } else {
+      console.error('Cannot check-in: Telegram ID missing or already checked in.');
     }
   };
 
@@ -107,7 +124,7 @@ export const AppProvider = ({ children }) => {
 
   const fetchTelegramID = async () => {
     try {
-      const response = await fetch('https://backend-proseed.vercel.app/api/fetchTelegramID', {
+      const response = await fetch('https://backend-proseed.vercel.app/api/users/fetchTelegramID', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: user.username }),
@@ -136,6 +153,7 @@ export const AppProvider = ({ children }) => {
         registerUserAutomatically,
         telegramId, // Include telegramId in context
         setTelegramId, // Include setTelegramId in context
+        fetchUserByTelegramId, // Include fetchUserByTelegramId in context
       }}
     >
       {children}
@@ -151,5 +169,3 @@ export const useAppContext = () => {
   }
   return context;
 };
-
-

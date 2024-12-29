@@ -30,7 +30,12 @@ const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100,  // Limit each IP to 100 requests per window
 });
-app.use(limiter);  // Apply rate limiter globally
+app.use((req, res, next) => {
+  if (req.path === '/health') {
+    return next(); // Exclude /health route from rate limiter
+  }
+  limiter(req, res, next);
+});
 
 // Async function to connect to MongoDB
 const connectDb = async () => {
@@ -45,7 +50,13 @@ const connectDb = async () => {
 };
 
 // Establish MongoDB connection
-const db = await connectDb(); // Await the connection before proceeding
+let db;
+try {
+  db = await connectDb(); // Await the connection
+} catch (error) {
+  console.error('Failed to connect to MongoDB:', error);
+  process.exit(1);
+}
 
 // Error handler utility
 const handleError = (error, chatId, message = 'An error occurred') => {
@@ -71,13 +82,14 @@ bot.onText(/\/start/, async (msg) => {
   try {
     const user = await registerOrUpdateUser(chatId, username);
     const welcomeMessage = `Welcome to proSEED, ${user.username}!\nYour ID: ${user.telegramId}`;
+    const baseUrl = process.env.BASE_URL || 'https://backend-proseed.vercel.app';
     const options = {
       reply_markup: {
         inline_keyboard: [
           [
             {
               text: 'Start App',
-              web_app: { url: 'https://backend-proseed.vercel.app/app' },
+              web_app: { url: baseUrl },
             },
           ],
         ],
@@ -121,9 +133,11 @@ bot.onText(/\/fetchID/, async (msg) => {
   const chatId = msg.chat.id;
   try {
     const user = await db.collection('users').findOne({ telegramId: chatId });
-    if (user) {
-      await db.collection('users').updateOne({ telegramId: chatId }, { $set: { telegramId: chatId } });
+    if (user && !user.telegramId) {
+      await db.collection('users').updateOne({ _id: user._id }, { $set: { telegramId: chatId } });
       bot.sendMessage(chatId, 'Telegram ID saved successfully.');
+    } else if (user) {
+      bot.sendMessage(chatId, 'Telegram ID is already saved.');
     } else {
       bot.sendMessage(chatId, 'User not found.');
     }
@@ -132,9 +146,19 @@ bot.onText(/\/fetchID/, async (msg) => {
   }
 });
 
+// Polling error handler
+bot.on('polling_error', (error) => {
+  console.error('Polling error:', error.code, error.response.body);
+});
+
 // Health check endpoint to monitor bot's status
-app.get('/health', (req, res) => {
-  res.send('Bot service is running');
+app.get('/health', async (req, res) => {
+  try {
+    await client.db().command({ ping: 1 }); // MongoDB health check
+    res.status(200).send('Bot service is running and MongoDB is connected');
+  } catch (error) {
+    res.status(500).send('Bot service is running, but MongoDB is not connected');
+  }
 });
 
 // Start the server
@@ -144,4 +168,3 @@ app.listen(PORT, () => {
 });
 
 module.exports = app; // Export app to be used in larger module or testing
-
