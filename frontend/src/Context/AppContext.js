@@ -1,6 +1,8 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 
+const API_URL = process.env.REACT_APP_API_URL || '';
+
 // Create AppContext
 const AppContext = createContext();
 
@@ -46,61 +48,76 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  const registerUserAutomatically = async (telegramUser) => {
+  const registerUser = async (telegramUser) => {
     try {
-      const response = await fetch('https://backend-proseed.vercel.app/api/users/registerUser', {
+      const response = await fetch(`${API_URL}/api/users/registerUser`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: telegramUser.username, telegramID: telegramUser.id }),
+        body: JSON.stringify({ 
+          username: telegramUser.username, 
+          telegramID: telegramUser.id 
+        }),
       });
+      
+      if (!response.ok) {
+        throw new Error('Registration failed');
+      }
+      
       const data = await response.json();
       setUser(data);
-      setTelegramId(data.telegramId); // Set telegramId
+      setTelegramId(data.telegramId);
     } catch (error) {
       console.error('Error registering user:', error);
+      throw error;
     }
   };
 
   const updateBalance = async (newBalance) => {
-    if (!user || !user._id) {
-      console.error('User data not available for balance update.');
-      return;
+    if (!user?._id) {
+      throw new Error('User data not available');
     }
+    
     try {
-      const response = await fetch('https://backend-proseed.vercel.app/api/users/updateBalance', {
+      const response = await fetch(`${API_URL}/api/users/updateBalance`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user._id, newBalance }),
       });
+      
+      if (!response.ok) {
+        throw new Error('Balance update failed');
+      }
+      
       const data = await response.json();
       setUser(data);
       setPsdtBalance(newBalance);
     } catch (error) {
       console.error('Error updating balance:', error);
+      throw error;
     }
   };
 
   const handleDailyCheckIn = async () => {
     if (!checkInStatus && telegramId) {
       try {
-        const response = await fetch('https://backend-proseed.vercel.app/api/users/dailyCheckIn', {
+        const response = await fetch(`${API_URL}/api/users/dailyCheckIn`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ telegramId }),
         });
 
-        const data = await response.json();
-        if (response.ok) {
-          setPsdtBalance(data.psdtBalance); // Update balance from server response
-          setCheckInStatus(true); // Mark as checked in
-        } else {
-          console.error('Daily check-in failed:', data.message);
+        if (!response.ok) {
+          throw new Error('Check-in failed');
         }
+
+        const data = await response.json();
+        setPsdtBalance(data.psdtBalance);
+        setCheckInStatus(true);
+        return data;
       } catch (error) {
-        console.error('Error during check-in:', error);
+        console.error('Daily check-in failed:', error);
+        throw error;
       }
-    } else {
-      console.error('Cannot check-in: Telegram ID missing or already checked in.');
     }
   };
 
@@ -150,7 +167,7 @@ export const AppProvider = ({ children }) => {
         fetchTelegramID,
         handleDailyCheckIn,
         checkInStatus,
-        registerUserAutomatically,
+        registerUser,
         telegramId, // Include telegramId in context
         setTelegramId, // Include setTelegramId in context
         fetchUserByTelegramId, // Include fetchUserByTelegramId in context

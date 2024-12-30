@@ -1,55 +1,68 @@
-const User = require('../models/User');
+import User from '../models/User.js';
 
 // Register or update a user based on their Telegram ID
 const registerOrUpdateUser = async (telegramId, username, walletAddress = null) => {
+  if (!telegramId) {
+    throw new Error('Telegram ID is required');
+  }
+
   try {
     let user = await User.findOne({ telegramId });
 
     if (!user) {
-      // Create a new user with the provided information
       user = new User({
         username: username || telegramId,
-        walletAddress,
         telegramId,
-        psdtBalance: 1000, // Initial balance set to 1000
+        psdtBalance: 1000,
+        createdAt: new Date()
       });
-      await user.save();
     } else {
-      // Update the existing user information if needed
       if (username && user.username !== username) user.username = username;
-      if (walletAddress && user.walletAddress !== walletAddress) user.walletAddress = walletAddress;
-      await user.save();
+      if (walletAddress) user.walletAddress = walletAddress;
     }
 
+    await user.save();
     return user;
   } catch (error) {
     throw new Error('Error registering or updating user: ' + error.message);
   }
 };
 
-// Get user data by MongoDB ObjectId
 const getUserById = async (req, res) => {
   try {
+    if (!req.params.id) {
+      return res.status(400).json({ message: 'User ID is required' });
+    }
+
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
     res.status(200).json(user);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ 
+      message: 'Server error',
+      error: err.message 
+    });
   }
 };
 
-// Get user data by Telegram ID
 const getUserByTelegramId = async (req, res) => {
   try {
+    if (!req.params.telegramId) {
+      return res.status(400).json({ message: 'Telegram ID is required' });
+    }
+
     const user = await User.findOne({ telegramId: req.params.telegramId });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
     res.status(200).json(user);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ 
+      message: 'Server error',
+      error: err.message 
+    });
   }
 };
 
@@ -123,12 +136,12 @@ const handleDailyCheckIn = async (req, res) => {
   }
 };
 
-module.exports = {
-  registerOrUpdateUser,
-  createUser,
-  getUserById,
-  getUserByTelegramId,
-  updateUserBalance,
-  fetchTelegramID,
-  handleDailyCheckIn
+export { 
+  registerOrUpdateUser, 
+  createUser, 
+  getUserById, 
+  getUserByTelegramId, 
+  updateUserBalance, 
+  fetchTelegramID, 
+  handleDailyCheckIn 
 };
