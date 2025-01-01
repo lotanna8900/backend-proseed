@@ -5,7 +5,7 @@ body {
   
   h1, h2, h3, h4, h5, h6 {
     margin: 0;
-    color: #1e90ff;
+    color: #ffffff;
   }
   
   p {
@@ -14,7 +14,7 @@ body {
   }
   
   button {
-    background-color: #1e90ff;
+    background-color: #ffcc00;
     color: #fff;
     border: none;
     padding: 10px 15px;

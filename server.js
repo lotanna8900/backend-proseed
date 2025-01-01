@@ -8,6 +8,7 @@ import cors from 'cors';
 import crypto from 'crypto'; // Add this line
 import helmet from 'helmet';
 import compression from 'compression';
+import rateLimit from 'express-rate-limit';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,13 +24,29 @@ if (!process.env.MONGO_URI || !process.env.TELEGRAM_BOT_TOKEN) {
 
 const app = express();
 
+// Trust proxy for Vercel deployment
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet());
 app.use(compression());
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || '*'
+  origin: process.env.ALLOWED_ORIGINS?.split(',') || '*',
+  credentials: true
 }));
 app.use(express.json());
+
+// Rate limiter configuration
+const limiter = rateLimit({
+  windowMs: process.env.RATE_LIMIT_WINDOW || 900000,
+  max: process.env.RATE_LIMIT_MAX || 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  trustProxy: true
+});
+
+// Apply rate limiting to all routes
+app.use(limiter);
 
 // Initialize database connection
 await connectDB();

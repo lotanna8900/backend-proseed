@@ -1,43 +1,80 @@
-import React, { useState } from 'react';
-import { useAppContext } from '../Context/AppContext.js';
-import { useTelegramWebApp } from '../hooks/useTelegramWebApp.js';
+import React, { useState, useEffect } from 'react';
+import { useAppContext } from '../Context/AppContext';
+import { useTelegramWebApp } from '../hooks/useTelegramWebApp';
+import './DailyCheckIn.css';
 
 const DailyCheckIn = () => {
-  const { handleDailyCheckIn, checkInStatus } = useAppContext();
   const { user } = useTelegramWebApp();
+  const { setPsdtBalance } = useAppContext();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [isCheckedIn, setIsCheckedIn] = useState(false);
+  const [timeUntilReset, setTimeUntilReset] = useState('');
+
+  useEffect(() => {
+    checkStatus();
+    const timer = setInterval(checkStatus, 60000); // Check every minute
+    return () => clearInterval(timer);
+  }, [user]);
+
+  const getMidnight = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    return tomorrow;
+  };
+
+  const checkStatus = async () => {
+    if (!user?.id) return;
+
+    const lastCheckIn = localStorage.getItem('lastCheckIn');
+    const now = new Date();
+    const midnight = getMidnight();
+
+    if (lastCheckIn) {
+      const lastCheckInDate = new Date(lastCheckIn);
+      setIsCheckedIn(lastCheckInDate.getDate() === now.getDate());
+    }
+
+    const diff = midnight - now;
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    setTimeUntilReset(`${hours}h ${minutes}m`);
+  };
 
   const handleCheckIn = async () => {
-    if (!user?.id) {
-      setError('Please open in Telegram');
-      return;
-    }
+    if (!user?.id || isLoading || isCheckedIn) return;
 
     setIsLoading(true);
-    setError(null);
-
     try {
-      await handleDailyCheckIn(user.id);
-    } catch (err) {
-      setError('Failed to check in. Please try again.');
-    } finally {
-      setIsLoading(false);
+      const response = await fetch('/api/users/dailyCheckIn', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telegramId: user.id })
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setPsdtBalance(prev => prev + 100);
+        setIsCheckedIn(true);
+        localStorage.setItem('lastCheckIn', new Date().toISOString());
+      }
+    } catch (error) {
+      console.error('Check-in failed:', error);
     }
+    setIsLoading(false);
   };
 
   return (
-    <div className="daily-checkin">
-      {error && <div className="error-message">{error}</div>}
-      <button
-        onClick={handleCheckIn}
-        disabled={checkInStatus || isLoading}
-        className={`checkin-button ${checkInStatus ? 'checked' : ''}`}
-      >
-        {isLoading ? 'Processing...' : 
-         checkInStatus ? 'Checked In' : 'Daily Check-In'}
-      </button>
-    </div>
+    <button 
+      className={`checkin-button ${isCheckedIn ? 'claimed' : ''}`}
+      onClick={handleCheckIn}
+      disabled={isLoading || isCheckedIn}
+    >
+      {isLoading ? 'Processing...' : 
+       isCheckedIn ? `Claimed Today! (Reset in ${timeUntilReset})` : 
+       'Claim Daily +100 PSDT'}
+    </button>
   );
 };
 

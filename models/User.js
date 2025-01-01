@@ -7,6 +7,12 @@ const userSchema = new mongoose.Schema({
     unique: true,
     trim: true
   },
+  telegramId: {
+    type: String,
+    unique: true,
+    required: true,
+    index: true
+  },
   walletAddress: {
     type: String,
     required: false, // Changed from true to false
@@ -40,12 +46,10 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  telegramId: {
-    type: String,
-    unique: true,
-    required: true,
-    index: true
-  },
+  referrals: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
   lastCheckIn: {
     type: Date,
     default: null
@@ -58,7 +62,11 @@ const userSchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
     default: Date.now
-  }
+  },
+  completedTasks: [{
+    type: Number,
+    default: []
+  }]
 });
 
 // Add pre-save middleware

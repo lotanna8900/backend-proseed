@@ -10,10 +10,11 @@ const AppContext = createContext();
 export const AppProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [psdtBalance, setPsdtBalance] = useState(1000); // Initial balance
-  const [walletAddress, setWalletAddress] = useState('');
+  const [walletAddress, setWalletAddress] = useState(null);
   const [loading, setLoading] = useState(true);
   const [checkInStatus, setCheckInStatus] = useState(false);
   const [telegramId, setTelegramId] = useState(''); // Add telegramId state
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Add isAuthenticated state
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -154,25 +155,27 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const value = {
+    user,
+    psdtBalance,
+    setPsdtBalance, // Ensure this is included here
+    walletAddress,
+    loading,
+    connectWallet,
+    updateBalance,
+    fetchTelegramID,
+    handleDailyCheckIn,
+    checkInStatus,
+    registerUser,
+    telegramId, // Include telegramId in context
+    setTelegramId, // Include setTelegramId in context
+    fetchUserByTelegramId, // Include fetchUserByTelegramId in context
+    isAuthenticated, // Include isAuthenticated in context
+    setIsAuthenticated // Include setIsAuthenticated in context
+  };
+
   return (
-    <AppContext.Provider
-      value={{
-        user,
-        psdtBalance,
-        setPsdtBalance, // Ensure this is included here
-        walletAddress,
-        loading,
-        connectWallet,
-        updateBalance,
-        fetchTelegramID,
-        handleDailyCheckIn,
-        checkInStatus,
-        registerUser,
-        telegramId, // Include telegramId in context
-        setTelegramId, // Include setTelegramId in context
-        fetchUserByTelegramId, // Include fetchUserByTelegramId in context
-      }}
-    >
+    <AppContext.Provider value={value}>
       {children}
     </AppContext.Provider>
   );

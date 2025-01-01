@@ -1,19 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App.js';  // Add .js extension
-import './index.css';  // No change needed
+import App from './App';
+import { AppProvider } from './Context/AppContext';
+import './index.css';
 
-const rootElement = document.getElementById('root');
-
-if (rootElement) {
-  const root = ReactDOM.createRoot(rootElement);
-  root.render(
-    <React.StrictMode>
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <React.StrictMode>
+    <AppProvider>
       <App />
-    </React.StrictMode>
-  );
-} else {
-  console.error("Target container 'root' not found in the HTML file.");
-}
-
-
+    </AppProvider>
+  </React.StrictMode>
+);

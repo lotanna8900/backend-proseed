@@ -5,7 +5,9 @@ import {
   updateUserBalance, 
   fetchTelegramID, 
   handleDailyCheckIn, 
-  getUserByTelegramId 
+  getUserByTelegramId,
+  generateReferral,
+  completeTask
 } from '../controllers/userController.js';
 import rateLimit from 'express-rate-limit';
 
@@ -25,7 +27,9 @@ router.post('/register', createUser);
 router.get('/id/:id', getUserById);
 router.put('/:id/balance', updateUserBalance);
 router.post('/fetchTelegramID', fetchTelegramID);
+router.post('/completeTask', completeTask);
 router.post('/dailyCheckIn', handleDailyCheckIn);
+router.post('/generateReferral', generateReferral);
 router.get('/telegram/:telegramId', getUserByTelegramId);
 
 export default router;

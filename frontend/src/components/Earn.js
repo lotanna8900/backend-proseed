@@ -1,10 +1,18 @@
-import React, { useState } from 'react';
-import './Earn.css';
+import React, { useState, useEffect } from 'react';
+import { useAppContext } from '../Context/AppContext';
+import { useTelegramWebApp } from '../hooks/useTelegramWebApp';
 import { FaTelegram, FaTwitter, FaYoutube, FaInstagram, FaTiktok } from 'react-icons/fa';
+import './Earn.css';
 import NavigationBar from './NavigationBar.js';  // Add .js extension
 
-const Earn = ({ updateBalance, userBalance }) => {
+const Earn = () => {
+  const { psdtBalance, setPsdtBalance } = useAppContext();
+  const { user } = useTelegramWebApp();
+  const [completedTasks, setCompletedTasks] = useState([]);
+  const [referralCount, setReferralCount] = useState(0);
+  const [referralLink, setReferralLink] = useState('');
   const [activeTab, setActiveTab] = useState('Direct Tasks');
+  const [isClaiming, setIsClaiming] = useState(false); // Add state for claiming
 
   const directTasks = [
     {
@@ -81,6 +89,72 @@ const Earn = ({ updateBalance, userBalance }) => {
     { range: '100 to 1,000 referrals', reward: 25000 },
   ];
 
+  const generateReferralLink = async () => {
+    if (!user?.id) return;
+
+    try {
+      const response = await fetch('/api/users/generateReferral', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telegramId: user.id })
+      });
+
+      const data = await response.json();
+      setReferralLink(data.referralLink);
+    } catch (error) {
+      console.error('Error generating referral link:', error);
+    }
+  };
+
+  const claimReferralReward = async () => {
+    setIsClaiming(true); // Set claiming state to true
+    const rewards = referralRewards.find(r => referralCount >= r.range.split(' ')[0]);
+    
+    if (rewards) {
+      try {
+        const response = await fetch('/api/users/referral/claim', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user.id, reward: rewards.reward })
+        });
+        const data = await response.json();
+        setPsdtBalance(data.newBalance);
+        alert('Referral reward claimed successfully!'); // Show success message
+      } catch (error) {
+        console.error('Error claiming referral reward:', error);
+        alert('Error claiming referral reward. Please try again later.'); // Show error message
+      } finally {
+        setIsClaiming(false); // Reset claiming state
+      }
+    } else {
+      setIsClaiming(false); // Reset claiming state if no rewards found
+    }
+  };
+
+  const completeTask = async (taskIndex) => {
+    if (!user?.id || completedTasks.includes(taskIndex)) return;
+
+    try {
+      const response = await fetch('/api/users/completeTask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          telegramId: user.id,
+          taskIndex,
+          reward: directTasks[taskIndex].rewards
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setPsdtBalance(prev => prev + directTasks[taskIndex].rewards);
+        setCompletedTasks(prev => [...prev, taskIndex]);
+      }
+    } catch (error) {
+      console.error('Error completing task:', error);
+    }
+  };
+
   const renderDirectTasks = () =>
     directTasks.map((task, index) => (
       <div className="task-card" key={index}>
@@ -88,9 +162,21 @@ const Earn = ({ updateBalance, userBalance }) => {
         <div className="task-content">
           <h3>{task.task}</h3>
           <p>Reward: +{task.rewards} PSDT</p>
-          <a href={task.link} target="_blank" rel="noopener noreferrer">
-            Complete Task
-          </a>
+          {completedTasks.includes(index) ? (
+            <button className="task-button completed" disabled>
+              Completed
+            </button>
+          ) : (
+            <button 
+              className="task-button"
+              onClick={() => {
+                window.open(task.link, '_blank');
+                completeTask(index);
+              }}
+            >
+              Complete Task
+            </button>
+          )}
         </div>
       </div>
     ));
@@ -111,7 +197,12 @@ const Earn = ({ updateBalance, userBalance }) => {
       <div className="referral-task-card" key={index}>
         <h3>{reward.range}</h3>
         <p>Reward: +{reward.reward} PSDT</p>
-        <button>Claim</button>
+        <button 
+          onClick={claimReferralReward}
+          disabled={isClaiming || referralCount < 5}
+        >
+          {isClaiming ? 'Claiming...' : 'Claim Referral Reward'}
+        </button>
       </div>
     ));
 
@@ -146,7 +237,26 @@ const Earn = ({ updateBalance, userBalance }) => {
         <div className="referral-section">
           <h2>Referral Link</h2>
           <p>Share your referral link to earn more rewards.</p>
-          <button className="generate-link">Generate Referral Link</button>
+          <button className="generate-link" onClick={generateReferralLink}>Generate Referral Link</button>
+          {referralLink && (
+            <div className="referral-link">
+              <p>Your Referral Link:</p>
+              <input readOnly value={referralLink} />
+              <button onClick={() => navigator.clipboard.writeText(referralLink)}>
+                Copy
+              </button>
+            </div>
+          )}
+          <div className="referral-stats">
+            <p>Referral Count: {referralCount}</p>
+            <button 
+              onClick={claimReferralReward}
+              disabled={isClaiming || referralCount < 5}
+              className={referralCount >= 5 ? 'ready' : 'disabled'}
+            >
+              Claim Referral Reward
+            </button>
+          </div>
         </div>
 
         {/* Referral Rewards */}
