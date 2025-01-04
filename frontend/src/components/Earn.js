@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAppContext } from '../Context/AppContext';
 import { useTelegramWebApp } from '../hooks/useTelegramWebApp';
 import { FaTelegram, FaTwitter, FaYoutube, FaInstagram, FaTiktok } from 'react-icons/fa';

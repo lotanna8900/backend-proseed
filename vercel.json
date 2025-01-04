@@ -12,35 +12,36 @@
       "use": "@vercel/static"
     }
   ],
-  "rewrites": [
+  "routes": [
     {
-      "source": "/api/(.*)",
-      "destination": "/server.js"
+      "src": "/webhook",
+      "methods": ["POST", "GET", "OPTIONS"],
+      "dest": "server.js",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type"
+      }
     },
     {
-      "source": "/static/(.*)",
-      "destination": "/frontend/build/static/$1"
+      "src": "/api/(.*)",
+      "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      "dest": "server.js"
     },
     {
-      "source": "/assets/(.*)",
-      "destination": "/frontend/build/assets/$1"
+      "src": "/static/(.*)",
+      "dest": "/frontend/build/static/$1"
     },
     {
-      "source": "/(.*)",
-      "destination": "/frontend/build/index.html"
+      "src": "/assets/(.*)",
+      "dest": "/frontend/build/assets/$1"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/frontend/build/index.html"
     }
-  ],
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Credentials", "value": "true" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
-        { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" }
-      ]
-    }
-  ],
-  "cleanUrls": true,
-  "trailingSlash": false
+  ]
 }

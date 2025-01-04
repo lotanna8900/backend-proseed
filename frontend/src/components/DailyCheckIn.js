@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAppContext } from '../Context/AppContext';
 import { useTelegramWebApp } from '../hooks/useTelegramWebApp';
 import './DailyCheckIn.css';
@@ -10,12 +10,6 @@ const DailyCheckIn = () => {
   const [isCheckedIn, setIsCheckedIn] = useState(false);
   const [timeUntilReset, setTimeUntilReset] = useState('');
 
-  useEffect(() => {
-    checkStatus();
-    const timer = setInterval(checkStatus, 60000); // Check every minute
-    return () => clearInterval(timer);
-  }, [user]);
-
   const getMidnight = () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -23,7 +17,7 @@ const DailyCheckIn = () => {
     return tomorrow;
   };
 
-  const checkStatus = async () => {
+  const checkStatus = useCallback(async () => {
     if (!user?.id) return;
 
     const lastCheckIn = localStorage.getItem('lastCheckIn');
@@ -39,7 +33,13 @@ const DailyCheckIn = () => {
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     setTimeUntilReset(`${hours}h ${minutes}m`);
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    checkStatus();
+    const timer = setInterval(checkStatus, 60000); // Check every minute
+    return () => clearInterval(timer);
+  }, [checkStatus]);
 
   const handleCheckIn = async () => {
     if (!user?.id || isLoading || isCheckedIn) return;

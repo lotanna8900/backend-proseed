@@ -5,10 +5,12 @@ import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import userRoutes from './routes/userRoutes.js';
 import cors from 'cors';
-import crypto from 'crypto'; // Add this line
+import crypto from 'crypto';
 import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
+import TelegramBot from 'node-telegram-bot-api';
+import { registerOrUpdateUser } from './controllers/userController.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,122 +19,94 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 // Validate required environment variables
-if (!process.env.MONGO_URI || !process.env.TELEGRAM_BOT_TOKEN) {
+if (!process.env.MONGO_URI || !process.env.TELEGRAM_BOT_TOKEN || !process.env.BASE_URL) {
   console.error('Missing required environment variables');
   process.exit(1);
 }
 
 const app = express();
-
-// Trust proxy for Vercel deployment
-app.set('trust proxy', 1);
-
-// Security middleware
-app.use(helmet());
-app.use(compression());
-app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || '*',
-  credentials: true
-}));
 app.use(express.json());
 
-// Rate limiter configuration
+// Middleware
+app.use(helmet());
+app.use(compression());
+app.use(cors());
+app.set('trust proxy', 1);
+
+// Rate limiter
 const limiter = rateLimit({
   windowMs: process.env.RATE_LIMIT_WINDOW || 900000,
   max: process.env.RATE_LIMIT_MAX || 100,
-  standardHeaders: true,
-  legacyHeaders: false,
-  trustProxy: true
 });
-
-// Apply rate limiting to all routes
 app.use(limiter);
 
-// Initialize database connection
+// Initialize database
 await connectDB();
+
+// Telegram bot setup with webhook
+const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { webHook: true });
+const webhookUrl = `${process.env.BASE_URL}/webhook`; // Vercel deployed URL
+
+// Set webhook
+bot.setWebHook(webhookUrl)
+  .then(() => console.log(`Webhook set successfully at ${webhookUrl}`))
+  .catch((error) => {
+    console.error('Error setting webhook:', error);
+    process.exit(1);
+  });
+
+// Handle Telegram webhook updates
+app.post('/webhook', (req, res) => {
+  bot.processUpdate(req.body); // Process the Telegram update
+  res.status(200).send('OK');  // Respond with OK
+});
+
+// Bot commands
+bot.onText(/\/start/, async (msg) => {
+  const chatId = msg.chat.id;
+  const username = msg.from.username ||
+    `${msg.from.first_name} ${msg.from.last_name}`.trim() ||
+    `User_${chatId}`;
+
+  try {
+    const user = await registerOrUpdateUser(chatId, username);
+    const welcomeMessage = `Welcome to proSEED, ${user.username}!\nYour ID: ${user.telegramId}`;
+    await bot.sendMessage(chatId, welcomeMessage, {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: 'Start App', web_app: { url: process.env.BASE_URL } }],
+        ],
+      },
+    });
+  } catch (error) {
+    console.error('Error handling /start command:', error);
+    bot.sendMessage(chatId, 'Error handling your request. Please try again.');
+  }
+});
 
 // API Routes
 app.use('/api/users', userRoutes);
 
-// Health check endpoint
+// Health check
 app.get('/api/health', (req, res) => res.send('Server is healthy'));
 
-// Import bot only in development
-if (process.env.NODE_ENV === 'development') {
-  const { bot } = await import('./telegram/bot.js');
-}
-
-// Serve static files in production
+// Serve React files in production
 if (process.env.NODE_ENV === 'production') {
-  // Serve static files
-  app.use(express.static(path.join(__dirname, 'frontend/build')));
-  
-  // Handle React routing
+  const buildPath = path.join(__dirname, 'frontend', 'build');
+  app.use(express.static(buildPath));
+
   app.get('*', (req, res) => {
     if (req.path.startsWith('/api')) {
       return res.status(404).send('API route not found');
     }
-    res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
+    res.sendFile(path.join(buildPath, 'index.html'));
   });
 }
 
-// Authentication endpoint
-app.post('/authenticate', (req, res) => {
-  const initData = req.body.initData;
-  const token = process.env.TELEGRAM_BOT_TOKEN; // Use environment variable for token
-
-  const checkString = Object.entries(initData)
-    .map(([key, value]) => `${key}=${value}`)
-    .join('\n');
-
-  const secretKey = crypto.createHash('sha256').update(token).digest();
-  const hash = crypto.createHmac('sha256', secretKey).update(checkString).digest('hex');
-
-  if (hash === initData.hash) {
-    res.json({ success: true, user: initData.user });
-  } else {
-    res.status(401).json({ success: false, error: 'Invalid initData' });
-  }
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
-
-// Global error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('Something broke!');
-});
-
-// Start server with port handling
-const startServer = async () => {
-  try {
-    const PORT = process.env.PORT || 3000;
-    const server = app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
-
-    // Handle server errors
-    server.on('error', (error) => {
-      if (error.code === 'EADDRINUSE') {
-        console.log(`Port ${PORT} is busy, trying ${PORT + 1}`);
-        server.close();
-        app.listen(PORT + 1);
-      }
-    });
-
-    // Graceful shutdown
-    process.on('SIGTERM', () => {
-      server.close(() => {
-        console.log('Server closed');
-        process.exit(0);
-      });
-    });
-  } catch (error) {
-    console.error('Failed to start server:', error);
-    process.exit(1);
-  }
-};
-
-if (process.env.NODE_ENV === 'development') {
-  startServer();
-}
 
 export default app;

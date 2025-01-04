@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AppProvider } from './Context/AppContext.js';
+import { AppProvider, useAppContext } from './Context/AppContext.js';
 import Home from './components/Home.js';
 import Opportunity from './components/Opportunity.js';
 import Earn from './components/Earn.js';
@@ -12,28 +12,12 @@ import './App.css';
 
 function App() {
   const { webApp, user, isLoading, error } = useTelegramWebApp();
+  const { authenticateUser } = useAppContext();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const authenticateUser = async () => {
-    if (!webApp?.initData) return;
-    
-    try {
-      const response = await fetch("/api/authenticate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ initData: webApp.initData }),
-      });
-      
-      const data = await response.json();
-      setIsAuthenticated(data.success);
-      
-      if (data.success && user?.id) {
-        await fetchUserData(user.id);
-      }
-    } catch (error) {
-      console.error('Authentication failed:', error);
-    }
-  };
+  useEffect(() => {
+    authenticateUser();
+  }, [authenticateUser]);
 
   const fetchUserData = async (telegramId) => {
     try {

@@ -13,16 +13,18 @@
     "express-rate-limit": "^7.5.0",
     "helmet": "^7.1.0",
     "compression": "^1.7.4",
-    "mongodb": "^6.3.0",
-    "mongoose": "^8.0.3",
+    "mongodb": "5.9.2",
+    "mongoose": "7.6.8",
     "node-telegram-bot-api": "^0.66.0",
-    "bson": "^5.5.0"
+    "bson": "^5.5.0",
+    "saslprep": "^1.0.3"
   },
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
     "dev:all": "concurrently \"npm run dev\" \"npm start --prefix frontend\"",
-    "build": "npm install",
+    "build": "npm ci",
+    "vercel-build": "npm ci",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "deploy": "vercel --prod"
   },
