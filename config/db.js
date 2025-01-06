@@ -1,38 +1,30 @@
 import mongoose from 'mongoose';
 
 const connectDB = async () => {
-  const uri = process.env.MONGO_URI;
-  console.log(`Attempting to connect to MongoDB with URI: ${uri}`);
-  
-  const connectWithRetry = () => {
-    mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 5000,
-      retryWrites: true,
-      w: 'majority'
-    })
-    .then(conn => {
-      console.log(`MongoDB Connected: ${conn.connection.host}`);
-    })
-    .catch(err => {
-      console.error(`Error: ${err.message}`);
-      console.log('Retrying MongoDB connection in 5 seconds...');
-      setTimeout(connectWithRetry, 5000);
+  try {
+    const conn = await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 30000,
+      socketTimeoutMS: 45000,
     });
-  };
 
-  // Handle disconnection
-  mongoose.connection.on('disconnected', () => {
-    console.log('MongoDB disconnected. Attempting to reconnect...');
-    connectWithRetry();
-  });
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
 
-  // Handle process termination
-  process.on('SIGINT', async () => {
-    await mongoose.connection.close();
-    process.exit(0);
-  });
+    mongoose.connection.on('disconnected', () => {
+      console.log('MongoDB disconnected. Attempting to reconnect...');
+      setTimeout(connectDB, 5000);
+    });
 
-  connectWithRetry();
+    mongoose.connection.on('error', (err) => {
+      console.error('MongoDB connection error:', err);
+      setTimeout(connectDB, 5000);
+    });
+
+  } catch (error) {
+    console.error('Error connecting to MongoDB:', error);
+    setTimeout(connectDB, 5000);
+  }
 };
 
 export default connectDB;

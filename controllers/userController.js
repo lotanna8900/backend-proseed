@@ -5,34 +5,67 @@ import crypto from 'crypto';
 const generateUniqueReferralCode = () => crypto.randomBytes(6).toString('hex');
 
 // Main Controller Functions
-const registerOrUpdateUser = async (telegramId, username, walletAddress = null, referrerId = null) => {
-  if (!telegramId) throw new Error('Telegram ID is required');
+export const registerOrUpdateUser = async (telegramId, username) => {
+  if (!telegramId) {
+    throw new Error('Telegram ID is required');
+  }
 
   try {
+    // First try to find existing user
     let user = await User.findOne({ telegramId });
-
-    if (!user) {
-      user = new User({
-        username: username || telegramId,
-        telegramId,
-        psdtBalance: 1000,
-        createdAt: new Date(),
-        referredBy: referrerId
-      });
-      await user.save();
-
-      if (referrerId) {
-        await registerReferral({ body: { referrerId, newUserId: user._id } });
+    
+    if (user) {
+      // Update existing user if username changed
+      if (username && username !== user.username) {
+        user.username = username;
+        user.updatedAt = new Date();
+        await user.save();
+        console.log('Existing user updated:', {
+          telegramId: user.telegramId,
+          username: user.username
+        });
       }
-    } else {
-      if (username) user.username = username;
-      if (walletAddress) user.walletAddress = walletAddress;
-      await user.save();
+      return user;
     }
 
+    // Create new user without setting walletAddress
+    user = new User({
+      telegramId,
+      username: username || telegramId,
+      psdtBalance: 1000,
+      completedTasks: [],
+      referrals: []
+      // Note: walletAddress is not set here, so it will be undefined
+    });
+    
+    await user.save();
+    console.log('New user created:', {
+      telegramId: user.telegramId,
+      username: user.username
+    });
     return user;
+
   } catch (error) {
-    throw new Error('Error registering or updating user: ' + error.message);
+    console.error('Registration error details:', {
+      errorCode: error.code,
+      errorMessage: error.message,
+      keyPattern: error.keyPattern,
+      stack: error.stack
+    });
+
+    if (error.code === 11000) {
+      // If duplicate key error occurs, try to find the user again
+      const existingUser = await User.findOne({ telegramId });
+      if (existingUser) {
+        console.log('Retrieved existing user after duplicate key error:', {
+          telegramId: existingUser.telegramId,
+          username: existingUser.username
+        });
+        return existingUser;
+      }
+    }
+    
+    throw error;
   }
 };
 
@@ -81,7 +114,10 @@ const generateReferralLink = async (req, res) => {
   try {
     const user = await User.findOne({ telegramId: userId });
     if (user) {
-      const referralLink = `${process.env.APP_URL}/register?ref=${user._id}`;
+      const referralCode = generateUniqueReferralCode();
+      const referralLink = `https://t.me/gothcoin_bot?start=ref_${referralCode}`;
+      user.referralLink = referralLink;
+      await user.save();
       res.json({ success: true, referralLink });
     } else {
       res.status(404).json({ message: 'User not found' });
@@ -194,7 +230,7 @@ const generateReferral = async (req, res) => {
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     const referralCode = generateUniqueReferralCode();
-    user.referralLink = `https://t.me/gothcoin_bot/ptesting?start=ref_${referralCode}`;
+    user.referralLink = `https://t.me/gothcoin_bot?start=ref_${referralCode}`;
     await user.save();
 
     return res.status(200).json({
@@ -242,7 +278,6 @@ const completeTask = async (req, res) => {
 
 // Single export statement for all functions
 export { 
-  registerOrUpdateUser, 
   createUser, 
   updateUserBalance, 
   fetchTelegramID,

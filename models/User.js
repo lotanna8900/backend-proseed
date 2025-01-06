@@ -1,79 +1,51 @@
+// In models/User.js - Updated schema
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
-  username: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true
-  },
   telegramId: {
     type: String,
-    unique: true,
     required: true,
-    index: true
+    unique: true
+  },
+  username: {
+    type: String,
+    required: true
   },
   walletAddress: {
     type: String,
-    required: false, // Changed from true to false
-    unique: true,
-    sparse: true,  // Added sparse index for null values
-    trim: true,
-    validate: {
-      validator: function(v) {
-        return v === null || /^0x[a-fA-F0-9]{40}$/.test(v);
-      },
-      message: 'Invalid Ethereum wallet address'
-    }
+    default: undefined, // Changed from null to undefined
+    sparse: true,      // Keep the sparse index
+    index: { unique: true, sparse: true }
   },
   psdtBalance: {
     type: Number,
-    default: 1000,
-    min: 0
+    default: 1000
   },
-  referralLink: {
-    type: String,
-    default: '',
-    unique: true,
-    sparse: true
+  completedTasks: {
+    type: [Number],
+    default: []
   },
-  referredBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    default: null
-  },
-  referralCount: {
-    type: Number,
-    default: 0
-  },
-  referrals: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }],
-  lastCheckIn: {
-    type: Date,
-    default: null
+  referrals: {
+    type: [String],
+    default: []
   },
   createdAt: {
     type: Date,
-    default: Date.now,
-    immutable: true
+    default: Date.now
   },
   updatedAt: {
     type: Date,
     default: Date.now
-  },
-  completedTasks: [{
-    type: Number,
-    default: []
-  }]
+  }
 });
 
-// Add pre-save middleware
+// Add middleware to handle wallet address
 userSchema.pre('save', function(next) {
-  this.updatedAt = new Date();
+  // If walletAddress is null, set it to undefined
+  if (this.walletAddress === null) {
+    this.walletAddress = undefined;
+  }
   next();
 });
 
-const User = mongoose.model('User', userSchema);
-export default User;
+export default mongoose.model('User', userSchema);
